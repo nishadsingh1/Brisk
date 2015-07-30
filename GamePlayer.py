@@ -9,10 +9,12 @@ class GamePlayer:
 		# self.enemy_player_state = Player_State()
 
 	def start(self):
-		brisk = Brisk();
 		while True:
-			player_state = brisk.get_player_status()
-			if player_state['current_turn']:
+			player_state = self.brisk.get_player_status()
+			if player_state['winner'] != "":
+				print 'won'
+				break;
+			elif player_state['current_turn']:
 				print 'starting turn'
 				self.take_turn(player_state)
 
@@ -27,10 +29,14 @@ class GamePlayer:
 	def launch_attack(self):
 		for territory in self.me.territories:
 			if len(territory.adjacent_territories) > 1:
+				print territory.id
 				adjacent_territory_id = territory.adjacent_territories[0]
-				print territory.id, adjacent_territory_id, min(3, territory.num_armies)
-				self.brisk.attack(territory.id, adjacent_territory_id, min(3, territory.num_armies))
-				break
+				print territory.adjacent_territories
+				print adjacent_territory_id
+				if (not self.me.owns_territory(adjacent_territory_id)):
+					print territory.id, adjacent_territory_id, min(3, territory.num_armies)
+					self.brisk.attack(territory.id, adjacent_territory_id, 1)
+					break
 
 	def take_turn(self, player_state):
 		self.update_information(player_state)
@@ -67,12 +73,14 @@ class Player_Status:
 	def __init__(self, brisk, map, is_me):
 		self.brisk = brisk
 		self.map = map
+		self.territory_ids = set()
 		# if is_me:
 		self.update()
 		# else:
 		# 	self.update(self.brisk.get_enemy_player_state())
 
 	def update(self, params=None):
+		print 'here'
 		if not params:
 			params = self.brisk.get_player_status()
 		self.version = params['version']
@@ -86,7 +94,13 @@ class Player_Status:
 		self.num_reserves = params['num_reserves']
 		self.territories = []
 		for territory in params['territories']:
+			territory_id = territory['territory']
+			print territory, territory_id
+			self.territory_ids.add(territory_id)
 			self.territories.append( Territory(territory['territory'], territory['num_armies'], self) )
+
+	def owns_territory(self, territory_id):
+		return territory_id in self.territory_ids
 
 class Territory:
 	def __init__(self, territory_id, num_armies, player_state):

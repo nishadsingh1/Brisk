@@ -51,7 +51,7 @@ class GamePlayer:
 				print adjacent_territory_id
 				if (not self.me.owns_territory(adjacent_territory_id)):
 					print territory.id, adjacent_territory_id, min(3, territory.num_armies)
-					self.brisk.attack(territory.id, adjacent_territory_id, 1)
+					self.brisk.attack(territory.id, adjacent_territory_id, min(3, territory.num_armies))
 					break
 
 	def take_turn(self, player_state):
@@ -59,15 +59,14 @@ class GamePlayer:
 		# get first territory that is available
 
 		# NEED TO IMPLEMENT
-		self.place_armies()
+		# self.place_armies()
 
 		# NEED TO IMPLEMENT
 		self.launch_attack()
 
 		# NEED TO IMPLEMENT
-		self.transfer_armies()
+		# self.transfer_armies_or_end_turn()
 
-		# NEED TO IMPLEMENT
 		self.brisk.end_turn()
 
 

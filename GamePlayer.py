@@ -5,6 +5,7 @@ class GamePlayer:
 		self.brisk = Brisk();
 		self.map = Map(self.brisk)
 		self.me = Player_Status(self.brisk, self.map, True)
+		self.winner = None
 		
 		# self.enemy_player_state = Player_State()
 
@@ -12,8 +13,9 @@ class GamePlayer:
 		while True:
 			player_state = self.brisk.get_player_status()
 			if player_state['winner']:
-				print 'won'
-				break;
+				self.winner = player_state['winner']
+				print str(self.winner) + " WON!"
+				return
 			elif player_state['current_turn']:
 				print 'starting turn'
 				self.take_turn(player_state)
@@ -45,13 +47,18 @@ class GamePlayer:
 	def launch_attack(self):
 		for territory in self.me.territories:
 			if len(territory.adjacent_territories) > 1:
-				print territory.id
 				adjacent_territory_id = territory.adjacent_territories[0]
-				print territory.adjacent_territories
-				print adjacent_territory_id
 				if (not self.me.owns_territory(adjacent_territory_id)):
-					print territory.id, adjacent_territory_id, min(3, territory.num_armies)
-					self.brisk.attack(territory.id, adjacent_territory_id, min(3, territory.num_armies))
+					sending = min(self.me.territory_map[territory.id]['num_armies'] - 1, 3)
+					if sending <= 0:
+						continue
+					print '-----------------'
+					print 'Game won: '+str(self.winner)
+					print 'Attacking territory id: '+str(territory.id)
+					print 'Defendig territory id: '+str(adjacent_territory_id)
+					print 'Attacking territory: '+str(self.me.territory_map[territory.id])
+					print 'Sending: '+str(sending)
+					self.brisk.attack(territory.id, adjacent_territory_id, sending)
 					break
 
 	def take_turn(self, player_state):
@@ -95,14 +102,13 @@ class Player_Status:
 	def __init__(self, brisk, map, is_me):
 		self.brisk = brisk
 		self.map = map
-		self.territory_ids = set()
+		self.territory_map = {}
 		# if is_me:
 		self.update()
 		# else:
 		# 	self.update(self.brisk.get_enemy_player_state())
 
 	def update(self, params=None):
-		print 'here'
 		if not params:
 			params = self.brisk.get_player_status()
 		self.version = params['version']
@@ -117,12 +123,11 @@ class Player_Status:
 		self.territories = []
 		for territory in params['territories']:
 			territory_id = territory['territory']
-			print territory, territory_id
-			self.territory_ids.add(territory_id)
+			self.territory_map[territory_id] = territory
 			self.territories.append( Territory(territory['territory'], territory['num_armies'], self) )
 
 	def owns_territory(self, territory_id):
-		return territory_id in self.territory_ids
+		return territory_id in self.territory_map
 
 class Territory:
 	def __init__(self, territory_id, num_armies, player_state):
@@ -133,3 +138,6 @@ class Territory:
 		self.map = self.owner.map
 		self.adjacent_territories = self.map.find(self.id)['adjacent_territories']
 		self.adjacent_territories = self.map.find(self.id)['adjacent_territories']
+
+g = GamePlayer()
+g.start()

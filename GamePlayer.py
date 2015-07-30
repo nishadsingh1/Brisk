@@ -1,19 +1,20 @@
-import Brisk.Brisk;
+from Brisk import Brisk;
 
 class GamePlayer:
 	def __init__(self):
 		self.brisk = Brisk();
-		self.map = Map(brisk)
-		self.me = Player_Status(brisk, self.map, true)
+		self.map = Map(self.brisk)
+		self.me = Player_Status(self.brisk, self.map, True)
 		
 		# self.enemy_player_state = Player_State()
 
 	def start(self):
 		brisk = Brisk();
-		while True():
+		while True:
 			player_state = brisk.get_player_status()
 			if player_state['current_turn']:
-				self.take_turn(player_stateus)
+				print 'starting turn'
+				self.take_turn(player_state)
 
 	def update_information(self, player_state_response):
 		self.me.update(player_state_response)
@@ -24,16 +25,17 @@ class GamePlayer:
 		self.brisk.place_armies(self.me.territories[0].id, num_reserves)
 
 	def launch_attack(self):
-		for territory in me.territories:
-			if territory.adjacent_territories.length > 1:
-				adjacent_territory = territory.adjacent_territories[0]
-				self.brisk.attack(territory.id, adjacent_territory.territory, min(3, territory.num_armies))
+		for territory in self.me.territories:
+			if len(territory.adjacent_territories) > 1:
+				adjacent_territory_id = territory.adjacent_territories[0]
+				print territory.id, adjacent_territory_id, min(3, territory.num_armies)
+				self.brisk.attack(territory.id, adjacent_territory_id, min(3, territory.num_armies))
 				break
 
-	def take_turn(self):
-		self.update_information()
+	def take_turn(self, player_state):
+		self.update_information(player_state)
 		# get first territory that is available
-		self.place_armies()
+		# self.place_armies()
 
 		self.launch_attack()
 
@@ -47,11 +49,17 @@ class Map:
 
 	def update(self, params = None):
 		if not params:
-			params = self.brisk.get_map_image()
-		self.territories = params['terirtories']
+			params = self.brisk.get_map_layout()
+		self.territories = params['territories']
 		self.version = params['version']
 		self.continents = params['continents']
 		self.serivce = params['service']
+
+	def find(self, territory_id):
+		for territory in self.territories:
+			if territory['territory'] == territory_id:
+				return territory
+		return 'No such territory id'
 
 
 class Player_Status:
@@ -69,8 +77,8 @@ class Player_Status:
 			params = self.brisk.get_player_status()
 		self.version = params['version']
 		self.service = params['service']
-		self.game = params['game']
-		self.player = params['player']
+		# self.game = params['game']
+		# self.player = params['player']
 		self.current_turn = params['current_turn']
 		self.eliminated = params['eliminated']
 		self.winner = params['winner']
@@ -78,13 +86,14 @@ class Player_Status:
 		self.num_reserves = params['num_reserves']
 		self.territories = []
 		for territory in params['territories']:
-			self.territories.append( Territory(territory['territory'], territory['num_armies']), self )
+			self.territories.append( Territory(territory['territory'], territory['num_armies'], self) )
 
 class Territory:
-	def __init__(self, params, player_state):
-		self.id = params['territory']
-		self.num_armies = params['num_armies']
+	def __init__(self, territory_id, num_armies, player_state):
+		self.id = territory_id
+		self.num_armies = num_armies
 		self.owner = player_state
 		self.brisk = self.owner.brisk
 		self.map = self.owner.map
-		self.adjacent_territories = self.map[self.territory_identifier]
+		self.adjacent_territories = self.map.find(self.id)['adjacent_territories']
+		self.adjacent_territories = self.map.find(self.id)['adjacent_territories']

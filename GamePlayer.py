@@ -11,7 +11,7 @@ class GamePlayer:
 	def start(self):
 		while True:
 			player_state = self.brisk.get_player_status()
-			if player_state['winner'] != "":
+			if player_state['winner']:
 				print 'won'
 				break;
 			elif player_state['current_turn']:
@@ -23,6 +23,22 @@ class GamePlayer:
 		# self.enemy_player_state.update(asdf)update
 
 	def place_armies(self):
+		possible_actions = self.get_possible_place_armies() # DO THIS
+		best_value = 0
+		best_action = None
+		for action in possible_actions:
+			fake_do(action) # alter our game board in place DO THIS
+			value = self.eval_place_armies() #see if we like the state of the board DO THIS
+			if (value > best_value):
+				best_value = value
+				best_action = action
+			fake_undo(action) # DO THIS
+		execute_action(action)
+		# update relevant information DO THIS
+
+
+
+
 		num_reserves = self.me.num_reserves
 		self.brisk.place_armies(self.me.territories[0].id, num_reserves)
 
@@ -41,10 +57,17 @@ class GamePlayer:
 	def take_turn(self, player_state):
 		self.update_information(player_state)
 		# get first territory that is available
-		# self.place_armies()
 
+		# NEED TO IMPLEMENT
+		self.place_armies()
+
+		# NEED TO IMPLEMENT
 		self.launch_attack()
 
+		# NEED TO IMPLEMENT
+		self.transfer_armies()
+
+		# NEED TO IMPLEMENT
 		self.brisk.end_turn()
 
 

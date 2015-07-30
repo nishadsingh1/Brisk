@@ -28,6 +28,13 @@ class Brisk(object):
     def url_player(self):
         return self.url_game() + "/player/" + str(self.player_id)
 
+    def url_enemy(self):
+        if self.player_id == 1:
+            id = 2
+        else:
+            id = 1
+        return self.url_game() + "/player/" + str(id)
+
     def url_territory(self, territory_id):
         return self.url_player() + "/territory/" + str(territory_id)
 
@@ -55,6 +62,9 @@ class Brisk(object):
     def get_player_status(self, lite=False):
         return self.get(self.url_player() + {False:"", True:"?check_turn=true"}[lite])
 
+    def get_enemy_status(self, lite=False):
+        self.get(self.url_enemy() + {False:"", True:"?check_turn=true"}[lite])
+
     def end_turn(self):
         return self.post(self.url_player(), {'token':self.token, 'end_turn':True})
         
@@ -67,6 +77,8 @@ class Brisk(object):
         return self.post(url, data)
 
     def place_armies(self, territory_id, num_armies):
+        if num_armies <= 0 or num_armies > 3:
+            return
         url = self.url_territory(territory_id)
         data = {'token':self.token, 'num_armies':num_armies}
         return self.post(url, data)

@@ -1,4 +1,5 @@
 from Brisk import Brisk;
+import time
 
 class GamePlayer:
 	def __init__(self):
@@ -17,8 +18,24 @@ class GamePlayer:
 				print str(self.winner) + " WON!"
 				return
 			elif player_state['current_turn']:
-				print 'starting turn'
+				t0  = time.time()
 				self.take_turn(player_state)
+				print "Took " + str(time.time() - t0) + "seconds"
+
+	def take_turn(self, player_state):
+		self.update_information(player_state)
+		# get first territory that is available
+
+		# NEED TO IMPLEMENT
+		# self.place_armies()
+
+		# NEED TO IMPLEMENT
+		self.launch_attack()
+
+		# NEED TO IMPLEMENT
+		# self.transfer_armies_or_end_turn()
+
+		self.brisk.end_turn()
 
 	def update_information(self, player_state_response):
 		self.me.update(player_state_response)
@@ -37,9 +54,6 @@ class GamePlayer:
 			fake_undo(action) # DO THIS
 		execute_action(action)
 		# update relevant information DO THIS
-
-
-
 
 		num_reserves = self.me.num_reserves
 		self.brisk.place_armies(self.me.territories[0].id, num_reserves)
@@ -60,21 +74,6 @@ class GamePlayer:
 					print 'Sending: '+str(sending)
 					self.brisk.attack(territory.id, adjacent_territory_id, sending)
 					break
-
-	def take_turn(self, player_state):
-		self.update_information(player_state)
-		# get first territory that is available
-
-		# NEED TO IMPLEMENT
-		# self.place_armies()
-
-		# NEED TO IMPLEMENT
-		self.launch_attack()
-
-		# NEED TO IMPLEMENT
-		# self.transfer_armies_or_end_turn()
-
-		self.brisk.end_turn()
 
 
 class Map:
